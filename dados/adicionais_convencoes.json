@@ -1,0 +1,84 @@
+{
+  "atualizado_em": "2026-11-18",
+  "aviso_transparencia": "Percentuais legais oficiais (CLT Art. 192/193, NR-15 e NR-16). A base de calculo especifica (salario minimo nacional vs. piso normativo da categoria) deve sempre ser confirmada na clausula vigente da CCT/ACT registrada no Sistema Mediador (MTE).",
+  "salario_minimo_referencia_brl": 1518.00,
+  "categorias": [
+    {
+      "id": "petroquimico_refap_rs",
+      "categoria": "Petroquímico / Refino (Canoas · Triunfo · REFAP)",
+      "sindicatos_ref": "SINDIPOLO / Sindipetro-RS",
+      "insalubridade": "10% (mínimo), 20% (médio) ou 40% (máximo) conforme laudo LTCAT/PPRA (agentes químicos/ruído NR-15)",
+      "insalubridade_base": "Verificar cláusula da CCT/ACT (muitos ACTs adotam piso normativo; regra geral CLT usa salário mínimo)",
+      "periculosidade": "30% sobre o salário-base (NR-16 Anexo 2 — inflamáveis, área de risco petroquímica)",
+      "cumulacao": "Não cumulável pela jurisprudência atual do TST/STF (opção pelo adicional mais vantajoso, salvo cláusula expressa em ACT)",
+      "grau_padrao_pct": 40,
+      "periculosidade_padrao_pct": 30
+    },
+    {
+      "id": "metalurgicos_canoas_poa",
+      "categoria": "Metalúrgicos & Manutenção Industrial (Canoas / Região Metropolitana RS)",
+      "sindicatos_ref": "STIMMMEC Canoas / STIMMMESP POA",
+      "insalubridade": "20% (grau médio: solda, ruído, óleos minerais) ou 40% (grau máximo: agentes químicos severos NR-15)",
+      "insalubridade_base": "Salário mínimo nacional ou piso da categoria se previsto expressamente na CCT vigente",
+      "periculosidade": "30% sobre salário-base quando houver trabalho em alta tensão (NR-16 Anexo 4) ou inflamáveis",
+      "cumulacao": "Opção pelo maior valor entre insalubridade e periculosidade (Art. 193 §2º CLT)",
+      "grau_padrao_pct": 20,
+      "periculosidade_padrao_pct": 30
+    },
+    {
+      "id": "construcao_pre_infra_rs",
+      "categoria": "Construção Civil, Elétrica & Pré-Infra (RS)",
+      "sindicatos_ref": "STICC Porto Alegre / Sinduscon-RS / Senergisul",
+      "insalubridade": "20% (cimento/poeira mineral/ruído) ou 40% (esgoto/galerias/produtos químicos NR-15)",
+      "insalubridade_base": "Regra geral salário mínimo nacional; verificar piso da CCT local",
+      "periculosidade": "30% sobre salário-base para trabalho em sistemas elétricos de potência/alta tensão (NR-16 Anexo 4) ou explosivos",
+      "cumulacao": "Opção pelo adicional mais vantajoso (Art. 193 §2º CLT)",
+      "grau_padrao_pct": 20,
+      "periculosidade_padrao_pct": 30
+    },
+    {
+      "id": "refrigeracao_climatizacao_rs",
+      "categoria": "Refrigeração, Climatização & Instalação Técnica (RS)",
+      "sindicatos_ref": "Sindratar-RS / Metalúrgicos / Construção",
+      "insalubridade": "20% (frio artificial câmara fria NR-15 Anexo 9 / ruído / gases refrigerantes conforme laudo)",
+      "insalubridade_base": "Salário mínimo nacional (ou base prevista na CCT)",
+      "periculosidade": "30% apenas se houver exposição habitual a painéis energizados de alta tensão ou fluidos inflamáveis em área de risco",
+      "cumulacao": "Opção pelo maior adicional",
+      "grau_padrao_pct": 20,
+      "periculosidade_padrao_pct": 0
+    },
+    {
+      "id": "vigilantes_seguranca_rs",
+      "categoria": "Vigilantes & Segurança Privada (RS)",
+      "sindicatos_ref": "Sindivigilantes do Sul",
+      "insalubridade": "Aplicável somente mediante laudo técnico no posto específico (NR-15)",
+      "insalubridade_base": "Salário mínimo nacional",
+      "periculosidade": "30% obrigatório sobre o salário-base (Lei 12.740/2012 · NR-16 Anexo 3 — risco de roubo/violência física)",
+      "cumulacao": "Opção pelo maior adicional",
+      "grau_padrao_pct": 0,
+      "periculosidade_padrao_pct": 30
+    },
+    {
+      "id": "saude_hospitais_rs",
+      "categoria": "Saúde, Hospitais & Clínicas (RS)",
+      "sindicatos_ref": "Sindisaúde-RS",
+      "insalubridade": "20% (contato habitual com pacientes/material biológico) ou 40% (isolamento/doenças infectocontagiosas NR-15 Anexo 14)",
+      "insalubridade_base": "Verificar CCT Sindisaúde-RS (algumas convenções fixam base diferenciada)",
+      "periculosidade": "30% para exposição a radiações ionizantes (Raio-X / medicina nuclear — Portaria 518/2003)",
+      "cumulacao": "Opção pelo maior adicional",
+      "grau_padrao_pct": 20,
+      "periculosidade_padrao_pct": 30
+    },
+    {
+      "id": "comercio_servicos_rs",
+      "categoria": "Comércio & Serviços Gerais (Canoas / POA)",
+      "sindicatos_ref": "Sindec Canoas / Sindec POA",
+      "insalubridade": "Não é padrão geral; 20% a 40% apenas para funções com câmara fria, limpeza de banheiros de grande circulação (Súmula 448 TST) ou químicos",
+      "insalubridade_base": "Salário mínimo nacional (ou piso se expresso na CCT)",
+      "periculosidade": "30% apenas para operadores com motocicleta em entregas (NR-16 Anexo 5) ou depósito de inflamáveis",
+      "cumulacao": "Opção pelo maior adicional",
+      "grau_padrao_pct": 20,
+      "periculosidade_padrao_pct": 0
+    }
+  ]
+}

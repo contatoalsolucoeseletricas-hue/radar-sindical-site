@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar Sindical Pro</title>
+<meta name="description" content="Descubra o sindicato da sua empresa pelo CNPJ e veja piso, reajuste e convenção coletiva de qualquer sindicato do Brasil.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="index.html"><span class="selo" aria-hidden="true">RS</span><b>Radar Sindical</b></a>
+  <nav>
+    <a href="#adicionais">Insalubridade / Periculosidade</a>
+    <a href="#planos">Planos</a>
+    <button id="btnConta" class="btn-claro">Entrar</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-texto">
+    <h1>O sindicato da sua empresa, o piso e o reajuste, em uma busca.</h1>
+    <p>Digite o CNPJ da empresa e veja os sindicatos prováveis da categoria. Ou busque o sindicato pelo nome, pelo CNPJ ou pela cidade. Com a conta grátis você já vê o piso e o reajuste da convenção mais recente.</p>
+    <div class="numeros" id="numeros"></div>
+  </div>
+  <aside class="exemplo" aria-label="Exemplo de ficha">
+    <p class="exemplo-rotulo">Exemplo de ficha</p>
+    <p class="exemplo-nome">Sind. dos Empregados no Comércio de Canoas</p>
+    <p class="exemplo-sub">Convenção 2026/2027 · data-base maio</p>
+    <div class="exemplo-linha">
+      <span class="carimbo"><small>reajuste</small>5,8%</span>
+      <dl><dt>Piso</dt><dd>R$ 1.920,00</dd><dt>Vigência</dt><dd>01/05/2026 a 30/04/2027</dd></dl>
+    </div>
+    <p class="exemplo-nota">Valores ilustrativos.</p>
+  </aside>
+</section>
+
+<main>
+  <div class="modos" role="tablist" aria-label="Tipo de busca">
+    <button role="tab" id="modoEmpresa" data-modo="empresa" aria-selected="true">CNPJ da empresa</button>
+    <button role="tab" id="modoSindicato" data-modo="sindicato" aria-selected="false">Sindicato</button>
+    <button role="tab" id="modoCidade" data-modo="cidade" aria-selected="false">Cidade ou estado</button>
+  </div>
+  <form id="formBusca" class="busca" role="search" data-modo="empresa">
+    <label class="sr" for="qTexto">Busca</label><input id="qTexto" placeholder="CNPJ da empresa (ex.: 12.345.678/0001-99)" autocomplete="off" inputmode="numeric">
+    <select id="qUF" aria-label="Estado"><option value="">Todos os estados</option></select>
+    <input id="qCidade" placeholder="Cidade" autocomplete="off" aria-label="Cidade">
+    <label class="chk"><input type="checkbox" id="qAtivos" checked> Só ativos</label>
+    <button class="btn" type="submit">Buscar</button>
+  </form>
+  <p class="dica" id="dicaModo">Mostra os sindicatos prováveis pela atividade (CNAE) e pela cidade da empresa na Receita Federal. Precisa de conta grátis.</p>
+
+  <section id="meus" class="meus oculto" aria-label="Suas buscas e sindicatos salvos">
+    <div><h2>Buscas recentes</h2><div id="listaHistorico" class="chips"></div></div>
+    <div><h2>Sindicatos salvos</h2><div id="listaFavoritos" class="chips"></div></div>
+  </section>
+
+  <div id="barraResultados" class="barra oculto">
+    <span id="contagem"></span>
+    <button id="btnZip" class="btn-claro">Baixar resultado em planilha <span class="tag">Pro</span></button>
+  </div>
+  <div id="empresa"></div>
+  <div id="resultados" class="lista"></div>
+  <div id="paginacao" class="paginacao"></div>
+</main>
+
+<section id="adicionais" class="planos" style="margin-top:28px;">
+  <h2>Insalubridade &amp; Periculosidade por Convenção (NR-15 / NR-16)</h2>
+  <p class="planos-sub" id="avisoAdicionais">Consulte as regras legais e simule adicionais por categoria sindical no RS.</p>
+  <div id="adicionaisBox" style="background:#fff;border:1px solid #d9dee7;border-radius:12px;padding:18px;">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:14px;">
+      <label style="flex:2;min-width:240px;font-size:13px;font-weight:600;">Categoria / Convenção (RS)
+        <select id="selCategoriaAdic" style="width:100%;margin-top:4px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;"></select>
+      </label>
+      <label style="flex:1;min-width:140px;font-size:13px;font-weight:600;">Salário-base (R$)
+        <input id="inpSalarioBase" type="number" step="50" value="2500" style="width:100%;margin-top:4px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;">
+      </label>
+      <label style="flex:1;min-width:150px;font-size:13px;font-weight:600;">Grau Insalubridade
+        <select id="selGrauInsalub" style="width:100%;margin-top:4px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;">
+          <option value="0">Sem insalubridade (0%)</option>
+          <option value="10">Grau Mínimo (10%)</option>
+          <option value="20" selected>Grau Médio (20%)</option>
+          <option value="40">Grau Máximo (40%)</option>
+        </select>
+      </label>
+      <label class="chk" style="padding:10px 6px;"><input type="checkbox" id="chkPericulosidade" checked> Periculosidade (30%)</label>
+    </div>
+    <div id="resultadoAdicional"></div>
+  </div>
+  <style>
+    .adic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+    .adic-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:14px;line-height:1.45}
+  </style>
+</section>
+
+<section id="planos" class="planos">
+  <h2>Planos</h2>
+  <p class="planos-sub">Comece grátis. Pague só quando precisar do histórico, dos documentos ou do aviso no Telegram.</p>
+  <div class="cards">
+    <div class="plano">
+      <h3>Grátis</h3><div class="preco">R$ 0</div>
+      <ul>
+        <li>Busca pelo CNPJ da empresa, do sindicato ou pela cidade</li>
+        <li><b>Piso, reajuste e resumo</b> da convenção mais recente</li>
+        <li>Buscas recentes e sindicatos salvos</li>
+        <li>3 perguntas por dia à IA</li>
+      </ul>
+      <button class="btn-claro" data-acao="entrar">Criar conta grátis</button>
+    </div>
+    <div class="plano destaque">
+      <h3>Pro</h3><div class="preco" id="precoPro"></div>
+      <ul>
+        <li>Tudo do Grátis</li>
+        <li><b>Ano atual e 4 anteriores</b>, com gráfico do reajuste</li>
+        <li>Convenção, termos aditivos e <b>acordos coletivos de empresa</b></li>
+        <li>Documento oficial aberto direto no Mediador (MTE)</li>
+        <li>Endereço, telefone e e-mail do sindicato; planilha da busca</li>
+        <li>30 perguntas por dia à IA, que procura o documento para você</li>
+      </ul>
+      <button class="btn" data-assinar="pro">Assinar Pro</button>
+    </div>
+    <div class="plano">
+      <h3>Plus</h3><div class="preco" id="precoCompleto"></div>
+      <ul>
+        <li>Tudo do Pro</li>
+        <li><b>Aviso no Telegram</b> quando sair convenção nova dos sindicatos que você segue</li>
+        <li>100 perguntas por dia à IA</li>
+      </ul>
+      <button class="btn" data-assinar="pro_completo">Assinar Plus</button>
+    </div>
+  </div>
+  <p class="nota">Pagamento por PIX. O plano é liberado assim que o pagamento é confirmado, normalmente no mesmo dia útil. Convenção nova aparece para todos os planos assim que entra na base; no Plus você também recebe o aviso.</p>
+</section>
+
+<footer>
+  <p><b>Aviso legal.</b> Informação de apoio, montada a partir de dados públicos (Receita Federal e Sistema Mediador do Ministério do Trabalho). O enquadramento sindical mostrado é provável; o que vale é a abrangência e a categoria descritas na convenção registrada. Não substitui a leitura do documento nem parecer jurídico.</p>
+  <p><a href="#" data-pagina="termos">Termos de uso</a> · <a href="#" data-pagina="privacidade">Política de privacidade</a></p>
+  <p id="fonteBase"></p>
+</footer>
+
+<div id="modal" class="modal oculto" role="dialog" aria-modal="true"><div class="caixa"><button class="fechar" id="fecharModal" aria-label="Fechar">×</button><div id="conteudoModal"></div></div></div>
+
+<script src="app.js"></script>
+<script src="adicionais.js"></script>
+</body>
+</html>

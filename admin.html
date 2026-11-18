@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar Sindical — Painel do Administrador</title>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+<header class="topo"><a class="marca" href="index.html"><span class="selo" aria-hidden="true">RS</span><b>Radar Sindical</b> <span class="pro">Admin</span></a><nav><a href="index.html">Ver site</a><button id="sair" class="btn-claro oculto">Sair</button></nav></header>
+<main>
+  <div id="login" class="plano">
+    <h3>Entrar como administrador</h3>
+    <input id="email" type="email" placeholder="seu e-mail de admin">
+    <div class="linha"><button class="btn" id="btnLink">Enviar link de acesso</button></div><div id="msg"></div>
+  </div>
+  <div id="painel" class="oculto">
+    <div class="numeros" id="resumo"></div>
+
+    <h2>Pedidos pendentes (PIX)</h2>
+    <div class="plano"><table><thead><tr><th>Data</th><th>E-mail</th><th>Plano</th><th>Valor</th><th>Comprovante</th><th></th></tr></thead><tbody id="pedidos"></tbody></table></div>
+
+    <h2>Cadastrar dissídio / convenção</h2>
+    <div class="plano">
+      <p class="nota"><b>IA (Gemini):</b> preencha nome/cidade/UF e clique em Pesquisar, ou cole o texto/escolha o PDF e clique em Extrair. A IA só preenche o formulário: confira antes de salvar.</p>
+      <div class="busca" style="grid-template-columns:2fr 1fr 80px;padding:0;border:0;box-shadow:none">
+        <input id="iaNome" placeholder="Nome do sindicato"><input id="iaCidade" placeholder="Cidade"><input id="iaUf" placeholder="UF" maxlength="2">
+      </div>
+      <textarea id="iaTexto" rows="3" placeholder="(opcional) cole aqui o texto da convenção"></textarea>
+      <input id="iaPdf" type="file" accept="application/pdf">
+      <div class="linha"><button class="btn-claro" id="btnPesquisarIA">Pesquisar com IA</button> <button class="btn-claro" id="btnExtrairIA">Extrair do texto/PDF</button></div>
+      <div id="msgIA"></div>
+      <input id="cCnpj" placeholder="CNPJ do sindicato (00.000.000/0000-00)">
+      <input id="cCategoria" placeholder="Categoria (ex.: comerciários, metalúrgicos)">
+      <div class="busca" style="grid-template-columns:1fr 1fr 1fr;padding:0;border:0;box-shadow:none">
+        <select id="cTipo" aria-label="Tipo"><option value="CCT">Convenção (CCT)</option><option value="ADITIVO_CCT">Aditivo à convenção</option><option value="ACT">Acordo de empresa (ACT)</option><option value="ADITIVO_ACT">Aditivo ao acordo</option></select>
+        <input id="cAno" type="number" placeholder="Ano (ex.: 2026)">
+        <input id="cSolic" placeholder="Nº no Mediador (MR012345/2026)">
+        <input id="cEmpCnpj" placeholder="ACT: CNPJ da empresa">
+        <input id="cEmpNome" placeholder="ACT: nome da empresa">
+        <input id="cAbrang" placeholder="Abrangência (Canoas/RS, Esteio/RS)">
+      </div>
+      <div class="busca" style="grid-template-columns:1fr 1fr 1fr;padding:0;border:0;box-shadow:none">
+        <input id="cDataBase" placeholder="Data-base (ex.: maio)">
+        <input id="cReajuste" type="number" step="0.01" placeholder="Reajuste %">
+        <input id="cPiso" type="number" step="0.01" placeholder="Piso R$">
+        <label>Início vigência<input id="cIni" type="date"></label>
+        <label>Fim vigência<input id="cFim" type="date"></label>
+        <input id="cLink" placeholder="Link do documento (Mediador/MTE)">
+      </div>
+      <textarea id="cResumo" rows="3" placeholder="Resumo (cláusulas principais), só Pro/Plus"></textarea>
+      <input id="cResumoCurto" maxlength="180" placeholder="Resumo curto, 1 linha (aparece no plano Grátis)">
+      <div class="linha"><button class="btn" id="btnSalvarConv">Salvar e avisar quem segue</button></div><div id="msgConv"></div>
+      <p class="nota">Aparece na hora para todos os planos. O aviso no Telegram (Plus) sai na próxima rodada do robô de alertas.</p>
+    </div>
+
+    <h2>Fila de revisão (vindas da IA / extrator em lote)</h2>
+    <div class="plano"><table><thead><tr><th>CNPJ</th><th>Categoria</th><th>Reajuste</th><th>Piso</th><th>Confiança</th><th>Fonte</th><th></th></tr></thead><tbody id="fila"></tbody></table></div>
+
+    <h2>Lidas por IA, aguardando conferência</h2>
+    <p class="nota">Já aparecem no site com o selo “lido por IA, confira”. Abra o documento, confira reajuste e piso e marque como conferida.</p>
+    <div class="plano"><table><thead><tr><th>CNPJ</th><th>Tipo/ano</th><th>Reajuste</th><th>Piso</th><th>Origem</th><th>Documento</th><th></th></tr></thead><tbody id="conferir"></tbody></table></div>
+
+    <h2>Sites de sindicatos monitorados</h2>
+    <div class="plano">
+      <div class="busca" style="grid-template-columns:1fr 2fr auto;padding:0;border:0;box-shadow:none">
+        <input id="fCnpj" placeholder="CNPJ do sindicato"><input id="fUrl" placeholder="Página de convenções do site (https://…)"><button class="btn" id="btnFonte">Adicionar</button>
+      </div><div id="msgFonte"></div>
+      <table><thead><tr><th>Página</th><th>CNPJ</th><th>Última verificação</th><th>Situação</th><th></th></tr></thead><tbody id="fontes"></tbody></table>
+    </div>
+
+    <h2>Registro do monitor</h2>
+    <div class="plano"><table><thead><tr><th>Quando</th><th>Fonte</th><th>Verificadas</th><th>Novidades</th><th>Erros</th><th>Detalhe</th></tr></thead><tbody id="mlog"></tbody></table></div>
+
+    <h2>Assinantes</h2>
+    <div class="plano"><table><thead><tr><th>E-mail</th><th>Plano</th><th>Validade</th><th>Telegram</th></tr></thead><tbody id="assinantes"></tbody></table></div>
+
+    <h2>Últimos dissídios cadastrados</h2>
+    <div class="plano"><table><thead><tr><th>CNPJ</th><th>Categoria</th><th>Reajuste</th><th>Data-base</th><th></th></tr></thead><tbody id="convs"></tbody></table></div>
+  </div>
+</main>
+<script>
+const C = window.RADAR, $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const sb = C.SUPABASE_URL ? supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY) : null;
+if (!sb) $("msg").innerHTML = '<div class="msg err">Preencha o config.js com os dados do Supabase.</div>';
+
+$("btnLink").onclick = async () => {
+  const { error } = await sb.auth.signInWithOtp({ email: $("email").value.trim(), options: { emailRedirectTo: location.href } });
+  $("msg").innerHTML = error ? `<div class="msg err">${esc(error.message)}</div>` : '<div class="msg ok">Link enviado. Abra o e-mail.</div>';
+};
+$("sair").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+
+async function iniciar() {
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  if (!data.session) return;
+  const { data: adm } = await sb.rpc("eh_admin");
+  if (!adm) { $("msg").innerHTML = '<div class="msg err">Esta conta não é administradora. Rode no SQL do Supabase: update perfis set eh_admin = true where email = \'SEU_EMAIL\';</div>'; return; }
+  $("login").classList.add("oculto"); $("painel").classList.remove("oculto"); $("sair").classList.remove("oculto");
+  carregar();
+}
+
+async function carregar() {
+  const fila = await sb.from("convencoes").select("*").eq("status", "revisar").order("id").limit(100);
+  $("fila").innerHTML = (fila.data || []).map((c) => `<tr><td>${esc(c.cnpj)}</td><td>${esc(c.categoria)}</td><td>${c.reajuste_pct ?? "-"}%</td><td>${c.piso_salarial ?? "-"}</td><td>${esc(c.confianca)}</td><td>${c.link ? `<a href="${esc(c.link)}" target="_blank" rel="noopener">abrir</a>` : "-"}</td>
+    <td><button class="btn" data-publicar="${c.id}">Publicar</button> <button class="btn-claro" data-excluir="${c.id}">Descartar</button></td></tr>`).join("") || '<tr><td colspan="7">Nada para revisar.</td></tr>';
+  const fmtData = (d) => (d ? new Date(d).toLocaleString("pt-BR") : "-");
+  const [cf, fo, ml] = await Promise.all([
+    sb.from("convencoes").select("*").eq("verificado", false).eq("status", "publicado").order("id", { ascending: false }).limit(100),
+    sb.from("fontes_monitoradas").select("*").order("id"),
+    sb.from("monitor_log").select("*").order("executado_em", { ascending: false }).limit(30),
+  ]);
+  $("conferir").innerHTML = (cf.data || []).map((c) => { const doc = c.nr_solicitacao ? "https://mediador.trabalho.gov.br/sistemas/mediador/Resumo/ResumoVisualizar?NrSolicitacao=" + encodeURIComponent(c.nr_solicitacao) : c.link;
+    return `<tr><td>${esc(c.cnpj)}</td><td>${esc(c.tipo)} ${esc(c.ano)}</td><td>${c.reajuste_pct ?? "-"}%</td><td>${c.piso_salarial ?? "-"}</td><td>${esc(c.origem)}</td><td>${doc ? `<a href="${esc(doc)}" target="_blank" rel="noopener">abrir</a>` : "-"}</td>
+    <td><button class="btn" data-conferir="${c.id}">Conferida</button> <button class="btn-claro" data-excluir="${c.id}">Excluir</button></td></tr>`; }).join("") || '<tr><td colspan="7">Nada aguardando conferência.</td></tr>';
+  $("fontes").innerHTML = (fo.data || []).map((f) => `<tr><td><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.url)}</a></td><td>${esc(f.cnpj)}</td><td>${fmtData(f.ultima_verificacao)}</td><td>${f.ativo ? esc(f.ultimo_status || "aguardando") : "pausada"}</td>
+    <td><button class="btn-claro" data-pausar="${f.id}" data-ativo="${f.ativo}">${f.ativo ? "Pausar" : "Retomar"}</button> <button class="btn-claro" data-tirar="${f.id}">Remover</button></td></tr>`).join("") || '<tr><td colspan="5">Nenhum site cadastrado ainda.</td></tr>';
+  $("mlog").innerHTML = (ml.data || []).map((l) => `<tr><td>${fmtData(l.executado_em)}</td><td>${l.fonte === "sites" ? "Sites" : "Mediador (assistido)"}</td><td>${l.verificadas}</td><td>${l.novidades}</td><td style="color:${l.erros ? "#A61B1B" : "inherit"}">${l.erros}</td><td>${esc(l.detalhe)}</td></tr>`).join("") || '<tr><td colspan="6">O monitor ainda não rodou.</td></tr>';
+  const [ped, ass, conv] = await Promise.all([
+    sb.from("pedidos").select("*").eq("status", "pendente").order("id"),
+    sb.from("perfis").select("*").neq("plano", "free").order("validade"),
+    sb.from("convencoes").select("*").eq("status", "publicado").order("id", { ascending: false }).limit(30),
+  ]);
+  const hoje = new Date().toISOString().slice(0, 10);
+  const ativos = (ass.data || []).filter((p) => !p.validade || p.validade >= hoje);
+  const receita = ativos.reduce((s, p) => s + (C.PRECOS[p.plano] || 0), 0);
+  $("resumo").innerHTML = `<div><b>${(ped.data || []).length}</b>pedidos pendentes</div><div><b>${ativos.length}</b>assinantes ativos</div><div><b>R$ ${receita.toFixed(2).replace(".", ",")}</b>receita mensal estimada</div>`;
+  $("pedidos").innerHTML = (ped.data || []).map((p) => `<tr><td>${new Date(p.criado_em).toLocaleString("pt-BR")}</td><td>${esc(p.email)}</td><td>${p.plano === "pro" ? "Pro" : "Plus"}</td><td>R$ ${Number(p.valor).toFixed(2)}</td><td>${esc(p.comprovante)}</td>
+    <td><button class="btn" data-aprovar="${p.id}">Aprovar 30 dias</button> <button class="btn-claro" data-recusar="${p.id}">Recusar</button></td></tr>`).join("") || '<tr><td colspan="6">Nenhum pedido pendente.</td></tr>';
+  $("assinantes").innerHTML = (ass.data || []).map((p) => `<tr><td>${esc(p.email)}</td><td>${p.plano}</td><td style="color:${p.validade && p.validade < hoje ? "#c62828" : "inherit"}">${p.validade ? new Date(p.validade + "T12:00").toLocaleDateString("pt-BR") : "-"}</td><td>${p.telegram_chat_id ? "✅" : "-"}</td></tr>`).join("") || '<tr><td colspan="4">Nenhum assinante ainda.</td></tr>';
+  $("convs").innerHTML = (conv.data || []).map((c) => `<tr><td>${esc(c.cnpj)}</td><td>${esc(c.categoria)}</td><td>${c.reajuste_pct ?? "-"}%</td><td>${esc(c.data_base)}</td><td><button class="btn-claro" data-excluir="${c.id}">Excluir</button></td></tr>`).join("") || '<tr><td colspan="5">Nenhum cadastrado.</td></tr>';
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.dataset.aprovar) { const { error } = await sb.rpc("aprovar_pedido", { p_id: +t.dataset.aprovar, p_dias: 30 }); if (error) alert(error.message); carregar(); }
+  if (t.dataset.recusar) { await sb.from("pedidos").update({ status: "recusado", decidido_em: new Date().toISOString() }).eq("id", t.dataset.recusar); carregar(); }
+  if (t.dataset.publicar) { const { error } = await sb.from("convencoes").update({ status: "publicado" }).eq("id", t.dataset.publicar); if (error) alert(error.message); carregar(); }
+  if (t.dataset.conferir) { const { error } = await sb.from("convencoes").update({ verificado: true }).eq("id", t.dataset.conferir); if (error) alert(error.message); carregar(); }
+  if (t.dataset.pausar) { await sb.from("fontes_monitoradas").update({ ativo: t.dataset.ativo !== "true" }).eq("id", t.dataset.pausar); carregar(); }
+  if (t.dataset.tirar && confirm("Remover este site do monitor?")) { await sb.from("fontes_monitoradas").delete().eq("id", t.dataset.tirar); carregar(); }
+  if (t.dataset.excluir && confirm("Excluir este dissídio?")) { await sb.from("convencoes").delete().eq("id", t.dataset.excluir); carregar(); }
+});
+
+$("btnSalvarConv").onclick = async () => {
+  const num = $("cCnpj").value.replace(/\D/g, "");
+  if (num.length !== 14) return ($("msgConv").innerHTML = '<div class="msg err">CNPJ precisa ter 14 números.</div>');
+  const cnpj = `${num.slice(0, 2)}.${num.slice(2, 5)}.${num.slice(5, 8)}/${num.slice(8, 12)}-${num.slice(12)}`;
+  const v = (id) => $(id).value.trim() || null;
+  const { error } = await sb.from("convencoes").insert({
+    cnpj, categoria: v("cCategoria"), data_base: v("cDataBase"),
+    reajuste_pct: v("cReajuste") ? Number(v("cReajuste")) : null, piso_salarial: v("cPiso") ? Number(v("cPiso")) : null,
+    vigencia_inicio: v("cIni"), vigencia_fim: v("cFim"), link: v("cLink"), resumo: v("cResumo"),
+    tipo: $("cTipo").value, ano: v("cAno") ? Number(v("cAno")) : (v("cIni") ? Number(v("cIni").slice(0, 4)) : null),
+    nr_solicitacao: v("cSolic"), empresa_cnpj: v("cEmpCnpj"), empresa_nome: v("cEmpNome"), abrangencia: v("cAbrang"),
+    resumo_curto: v("cResumoCurto"), verificado: true,
+  });
+  $("msgConv").innerHTML = error ? `<div class="msg err">${esc(error.message)}</div>` : '<div class="msg ok">Salvo! Quem segue este sindicato vai receber o alerta.</div>';
+  if (!error) { ["cCnpj", "cCategoria", "cDataBase", "cReajuste", "cPiso", "cIni", "cFim", "cLink", "cResumo", "cAno", "cSolic", "cEmpCnpj", "cEmpNome", "cAbrang", "cResumoCurto"].forEach((i) => ($(i).value = "")); carregar(); }
+};
+$("btnFonte").onclick = async () => {
+  const url = $("fUrl").value.trim(), num = $("fCnpj").value.replace(/\D/g, "");
+  if (!/^https?:\/\//.test(url)) return ($("msgFonte").innerHTML = '<div class="msg err">Cole o endereço completo, começando com https://</div>');
+  const { error } = await sb.from("fontes_monitoradas").insert({ url, cnpj: num.length === 14 ? `${num.slice(0, 2)}.${num.slice(2, 5)}.${num.slice(5, 8)}/${num.slice(8, 12)}-${num.slice(12)}` : null });
+  $("msgFonte").innerHTML = error ? `<div class="msg err">${esc(error.message)}</div>` : '<div class="msg ok">Site adicionado. O monitor verifica em até 2 horas.</div>';
+  if (!error) { $("fUrl").value = ""; $("fCnpj").value = ""; carregar(); }
+};
+async function chamarIA(corpo) {
+  $("msgIA").innerHTML = '<div class="msg">Consultando a IA… (até 30 s)</div>';
+  const { data, error } = await sb.functions.invoke("ia-convencoes", { body: corpo });
+  if (error || data?.erro) return ($("msgIA").innerHTML = `<div class="msg err">${esc(data?.erro || error.message)}</div>`);
+  const d = data.dados || {}, put = (id, v) => { if (v !== null && v !== undefined && v !== "") $(id).value = v; };
+  put("cCategoria", d.categoria); put("cDataBase", d.data_base); put("cReajuste", d.reajuste_pct); put("cPiso", d.piso_salarial);
+  put("cIni", d.vigencia_inicio); put("cFim", d.vigencia_fim); put("cLink", d.link); put("cResumo", d.resumo);
+  const fontes = (data.fontes || []).map((f) => `<a href="${esc(f.link)}" target="_blank" rel="noopener">${esc(f.titulo || f.link)}</a>`).join(" · ");
+  $("msgIA").innerHTML = `<div class="msg ok">Formulário preenchido (confiança: ${esc(d.confianca || "?")}). CONFIRA na fonte antes de salvar.${fontes ? "<br>Fontes: " + fontes : ""}</div>`;
+}
+$("btnPesquisarIA").onclick = () => chamarIA({ modo: "pesquisar", nome: $("iaNome").value, cidade: $("iaCidade").value, uf: $("iaUf").value, cnpj: $("cCnpj").value });
+$("btnExtrairIA").onclick = async () => {
+  const f = $("iaPdf").files[0]; let pdfBase64;
+  if (f) { if (f.size > 15e6) return ($("msgIA").innerHTML = '<div class="msg err">PDF maior que 15 MB.</div>');
+    const b = new Uint8Array(await f.arrayBuffer()); let bin = ""; for (let i = 0; i < b.length; i += 32768) bin += String.fromCharCode(...b.subarray(i, i + 32768)); pdfBase64 = btoa(bin); }
+  chamarIA({ modo: "extrair", texto: $("iaTexto").value, pdfBase64 });
+};
+if (sb) sb.auth.onAuthStateChange(() => setTimeout(iniciar, 0));
+iniciar();
+</script>
+</body>
+</html>
