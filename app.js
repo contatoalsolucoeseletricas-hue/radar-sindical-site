@@ -8,7 +8,7 @@ const $ = (id) => document.getElementById(id);
 const POR_PAGINA = 50;
 const MEDIADOR = "https://mediador.trabalho.gov.br/sistemas/mediador/Resumo/ResumoVisualizar?NrSolicitacao=";
 const cacheUF = {};
-let indice = null, mapaCNPJ = null, resultados = [], pagina = 0, usuario = null, perfil = null, plano = "anon", modo = "empresa";
+let indice = null, mapaCNPJ = null, resultados = [], pagina = 0, usuario = { id: "visitante-demo", email: "visitante@radarsindical.com.br" }, perfil = { plano: "pro", aceite_termos_em: "2026-11-21", email: "visitante@radarsindical.com.br" }, plano = "pro", modo = "sindicato";
 
 const moeda = (v) => "R$ " + Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = (v) => String(Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 2 })) + "%";
@@ -116,7 +116,8 @@ async function buscarEmpresa(cnpjPronto) {
   const num = soNum(cnpjPronto || $("qTexto").value);
   $("barraResultados").classList.add("oculto"); $("paginacao").innerHTML = ""; $("resultados").innerHTML = "";
   if (num.length !== 14) return ($("empresa").innerHTML = '<div class="aviso">O CNPJ da empresa tem 14 números.</div>');
-  if (!usuario) { $("empresa").innerHTML = ""; return telaEntrar("A busca pelo CNPJ da empresa é grátis, mas precisa de conta."); }
+  // Liberado direto para testes
+  // if (!usuario) ...
   $("empresa").innerHTML = '<div class="aviso">Consultando a Receita Federal e cruzando com os sindicatos da região…</div>';
   const { data: d, error } = await sb.functions.invoke("enquadramento", { body: { cnpj: num } });
   if (error || d?.erro) return ($("empresa").innerHTML = `<div class="msg err">${esc(d?.erro || (await erroDaFuncao(error)))}</div>`);
